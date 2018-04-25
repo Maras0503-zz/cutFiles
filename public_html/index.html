@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>cutFiles</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link href="CSS/reset.css" rel="stylesheet" type="text/css"/>
+        <link href="CSS/main.css" rel="stylesheet" type="text/css"/>
+        
+
+        <script src="JS/jquery-3.1.1.js" type="text/javascript"></script>
+        <script src="JS/functionality.js" type="text/javascript"></script>
+        
+    </head>
+    <body>
+        <div class='topBar'>
+            <select id='chooseSize'>
+            </select>
+            <select id='chooseQty'>
+            </select>
+            <select id='alg'>
+                <option value="1">Current</option>
+                <option value="2" selected>Optimal</option>
+            </select>
+        </div>
+        <div class='cutWrapper'>
+            <div class='cutFileBody'></div>
+        </div>
+        <div class='canvasWrapper'>
+            <canvas id='myCanvas' class='draw' width="1300" height="900">
+
+            </canvas>
+        </div>
+    </body>
+</html>

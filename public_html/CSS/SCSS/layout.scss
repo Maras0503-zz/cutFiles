@@ -1,0 +1,124 @@
+$primaryColor: #60b787;
+$secondaryColor: #89c9a6;
+$sideMenuWidth: 15%;
+$topBarHeight: 50px;
+$breakpoint-small-screen: 1200px;
+$breakpoint-phone: 768px;
+body{
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    overflow: hidden;
+}
+.sideMenu{
+    position: absolute;
+    box-sizing: border-box;
+    background-color: $primaryColor;
+    width: $sideMenuWidth;
+    top: $topBarHeight;
+    height: calc( 100% - #{$topBarHeight});
+    button{
+        font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+        width: 100%;
+        display: block;
+        text-align: center;
+        padding: 10px;
+        background-color: $secondaryColor;
+        font-size: 1.2em;
+        color: white;
+        cursor: pointer;
+    }
+    @media screen and (max-width: $breakpoint-phone){
+        display: none;
+    }
+}
+
+.topBar{
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    height: $topBarHeight;
+    background-color: $primaryColor;
+    select{
+        font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+        width: 300px;
+        height: 100%;
+        cursor: pointer;
+        border: solid gray 1px;
+        float: right;
+        background-color: $secondaryColor;
+        box-sizing: border-box;
+        font-size: 1.3em;
+        color: white;
+        @media screen and (max-width: $breakpoint-phone){
+            width: 40%;
+        }
+        &#chooseQty{
+            width: 20%;
+        }
+    }
+}
+
+.cutWrapper{
+    padding-top: 2%;
+    position: absolute;
+    box-sizing: border-box;
+    overflow-y: auto;
+    height: calc(100% - #{$topBarHeight} - 2px );
+    width: 100%;
+    .cutFileBody{
+        display: block;
+        position: absolute;
+        margin-left: 2%;
+        font-size: 1.2em;
+        overflow-y: auto;
+        width: 30%;
+        height: calc(100% - 50px);
+        @media screen and (max-width: $breakpoint-phone){
+            height: calc(50% - 50px);
+            width: 98%;
+        }
+    }
+}
+.canvasWrapper{
+    display: block;
+    position: absolute;
+    right: 0px;
+    font-size: 1.2em;
+    overflow: auto;
+    width: 70%;
+    height: calc(100% - 50px);
+    @media screen and (max-width: $breakpoint-phone){
+        width: 100%;
+        height: 50%;
+        top: 50%;
+    }
+}
+#myCanvas{
+    width: 100%;
+    height: 100%;
+    @media screen and (max-width: $breakpoint-phone){
+        width: 100%;
+        height: 100%;
+    }
+}
+.draw{
+    position: absolute;
+    right: 0px;
+    background: lightgray;
+}
+
+::-webkit-scrollbar {
+    width: 15px;
+}
+
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey; 
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $secondaryColor;
+    &:hover{
+        background: $secondaryColor;
+    }
+}
+
