@@ -56,7 +56,7 @@ var functionality = (function() {
     var buildQtySelectOptions = function(x, y){
         res = '';
         for (i=0; i<x*y; i++){
-            res += '<option value='+ (i+1) +'>'+ (i+1) +'</option>';            
+            res += '<option value='+ (i+1) +'>'+ (i) +'</option>';            
         }
         return res;
     }
@@ -123,37 +123,51 @@ var functionality = (function() {
         ctx.stroke();
         
         if($('#alg').val() == 1){
-            //WHEN ALWAYS THE SAME SIZE OF BATCH
+            ctx.beginPath();
+            //WHEN BATCH WILL HAVE MINIMUM SIZE
             cut += 'RegMark ' + firstRegMarkX + '.0,' + firstRegMarkY + '.0,Regmark<br>';
             ctx.beginPath();
             ctx.arc(firstRegMarkX/2,firstRegMarkY/2,2,0,2*Math.PI);
             ctx.stroke();
-            cut += 'RegMark ' + (cornerPosX + qtyx*x) + '.0,' + firstRegMarkY + '.0,Regmark<br>';
+            cut += 'RegMark ' + (cornerPosX + columns*x) + '.0,' + firstRegMarkY + '.0,Regmark<br>';
             ctx.beginPath();
-            ctx.arc((cornerPosX + qtyx*x)/2,firstRegMarkY/2,2,0,2*Math.PI);
+            ctx.arc((cornerPosX + columns*x)/2,firstRegMarkY/2,2,0,2*Math.PI);
             ctx.stroke();
-            cut += 'RegMark ' + firstRegMarkX + '.0,' + (cornerPosY+qtyy*y+12) + '.0,Regmark<br>';
+            cut += 'RegMark ' + firstRegMarkX + '.0,' + (cornerPosY+row*y+12) + '.0,Regmark<br>';
             ctx.beginPath();
-            ctx.arc(firstRegMarkX/2,(cornerPosY+qtyy*y+12)/2,2,0,2*Math.PI);
+            ctx.arc(firstRegMarkX/2,(cornerPosY+row*y+12)/2,2,0,2*Math.PI);
             ctx.stroke();
-            cut += 'RegMark ' + (cornerPosX + qtyx*x) + '.0,' + (cornerPosY+qtyy*y+12) + '.0,Regmark<br>';
+            cut += 'RegMark ' + (cornerPosX + columns*x) + '.0,' + (cornerPosY+row*y+12) + '.0,Regmark<br>';
             ctx.beginPath();
-            ctx.arc((cornerPosX + qtyx*x)/2,(cornerPosY+qtyy*y+12)/2,2,0,2*Math.PI);
+            ctx.arc((cornerPosX + columns*x)/2,(cornerPosY+row*y+12)/2,2,0,2*Math.PI);
             ctx.stroke();
-            ctx.beginPath();
             cut += 'SelectLayer Cut<br>';
-            //IF ALWAYS CUT MAXIMUM QTY
-            for(var i = 0; i <= Number(qtyy) ; i++){
-                cut += 'MoveTo ' + cornerPosX + '.0,' + (cornerPosY + (y * i)) + '.0,Open,Cut<br>';
-                cut += 'LineTo ' + (((qtyx) * x) + cornerPosX) + '.0,' + (cornerPosY + (y * i)) +'.0,Corner<br>';
-                ctx.moveTo(cornerPosX /2, (cornerPosY + (y * i)) /2);
-                ctx.lineTo((((qtyx) * x) + cornerPosX) /2, (cornerPosY + (y * i)) /2);
+            //IF CUT MINIMUM TIMES
+            for(var i = Number(row); i >=  0; i--){
+                if( i < row - qtyInLastColumn && qtyInLastColumn !== 0 ){
+                    cut += 'MoveTo ' + ((columns * x) + cornerPosX) + '.0,' + ((y * i) + cornerPosY) + '.0,Open,Cut<br>';
+                    cut += 'LineTo ' + (Number(cornerPosX) + Number(x)) + '.0,' + ((y * i) + cornerPosY) +'.0,Corner<br>';
+                    ctx.moveTo(((columns * x) + cornerPosX) /2, ((y * i) + cornerPosY) /2);
+                    ctx.lineTo( (Number(cornerPosX) + Number(x)) /2, ((y * i) + cornerPosY) /2);
+                } else {
+                    cut += 'MoveTo ' + ((columns * x) + cornerPosX) + '.0,' + ((y * i) + cornerPosY) +  '.0,Open,Cut<br>';
+                    cut += 'LineTo ' + cornerPosX + '.0,' + ((y * i) + cornerPosY) + '.0,Corner<br>';
+                    ctx.moveTo(((columns * x) + cornerPosX) /2, ((y * i) + cornerPosY) /2);
+                    ctx.lineTo(cornerPosX /2, ((y * i) + cornerPosY) /2);
+                }
             }
-            for(var j = 0; j <= Number(qtyx) ; j++){
-                cut += 'MoveTo ' + (cornerPosX + (x * j)) + '.0,' + cornerPosY + '.0,Open,Cut<br>';
-                cut += 'LineTo ' + (cornerPosX + (x * j)) + '.0,' + ((qtyy * y) + cornerPosY) +'.0,Corner<br>';
-                ctx.moveTo((cornerPosX + (x * j)) /2, cornerPosY /2);
-                ctx.lineTo((cornerPosX + (x * j)) /2, ((qtyy * y) + cornerPosY) /2);
+            for(var j = Number(columns); j >= 0 ; j--){
+                if (j === 0 && qtyInLastColumn !== 0 ){
+                    cut += 'MoveTo ' + (cornerPosX + (j*x)) + '.0,' + ((row * y) + cornerPosY) + '.0,Open,Cut<br>';
+                    cut += 'LineTo ' + (cornerPosX + (j*x)) + '.0,' + (cornerPosY + ((row - qtyInLastColumn)*y)) +'.0,Corner<br>';
+                    ctx.moveTo((cornerPosX + (j*x)) /2, ((row * y) + cornerPosY) /2);
+                    ctx.lineTo((cornerPosX + (j*x)) /2, (cornerPosY + ((row - qtyInLastColumn)*y)) /2);
+                } else {
+                    cut += 'MoveTo ' + (cornerPosX + (j*x)) + '.0,' + ((row * y) + cornerPosY) + '.0,Open,Cut<br>';
+                    cut += 'LineTo ' + (cornerPosX + (j*x)) + '.0,' + cornerPosY +'.0,Corner<br>';
+                    ctx.moveTo((cornerPosX + (j*x)) /2, ((row * y) + cornerPosY) /2);
+                    ctx.lineTo((cornerPosX + (j*x)) /2, cornerPosY /2);
+                }
             }
             ctx.stroke();
         } else {
@@ -206,7 +220,7 @@ var functionality = (function() {
             ctx.stroke();
         }
 
-        cut += 'Offset 1.0,20.0<br>';
+        cut += 'Offset 1.0, 20.0<br>';
         return cut;
     }
 
