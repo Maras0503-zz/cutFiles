@@ -26,11 +26,12 @@ var functionality = (function() {
         $('#chooseQty').on('change', function() {
             $('.cutFileBody').html(createCutFile(x, y, qtyx, qtyy, $('#chooseQty').val()));
         });
-        $('#alg').on('change', function() {
-            $('.cutFileBody').html(createCutFile(x, y, qtyx, qtyy, $('#chooseQty').val()));
-        });
     });
 
+    /**
+     * GENERATING TYPE SELECT CONTENT
+     * @param {ARRAY} data 
+     */
     var generateTypeSelectBody = function(data){
         var ans = '';
         $.each(data,function(index, value){
@@ -38,7 +39,9 @@ var functionality = (function() {
         });    
         return ans;
     }
-
+    /**
+     * GET INFORMATIONS FROM DB ABOUT AVAILABLE SIZES
+     */
     var getSizes = (function(){
         var res;
         $.ajax({
@@ -52,15 +55,25 @@ var functionality = (function() {
         });
         return res;
     });
-
+    /**
+     * BUILD QUANTITY SELECT CONTENT
+     * @param {INT} x MAX X QUANTITY FOR SELECTED SIZE
+     * @param {INT} y MAX Y QUANTITY FOR SELECTED SIZE
+     */
     var buildQtySelectOptions = function(x, y){
         res = '';
         for (i=0; i<x*y; i++){
-            res += '<option value='+ (i+1) +'>'+ (i) +'</option>';            
+            if (i<10){
+                res += '<option value='+ (i+1) +'>'+ 'SUFFIX: 0' + (i) + ' (-' + (i+1) + ' pcs-)' + '</option>';
+            } else {
+                res += '<option value='+ (i+1) +'>'+ 'SUFFIX: ' + (i) + ' (-' + (i+1) + ' pcs-)' + '</option>';   
+            } 
         }
         return res;
     }
-
+    /**
+     * GET DATA ABOUT SELECTED SIZE
+     */
     var getSelectedTypeData = (function(){
         var param = {};
         param['typeId'] = $('#chooseSize').val();
@@ -78,9 +91,14 @@ var functionality = (function() {
             }
         });
     });
-
+    /**
+     * COORDINATES FOR BOTTOM LEFT CORNER
+     */
     var cornerPosX = 45;
     var cornerPosY = 47;
+    /**
+     * COORDINATES FOR BOTTOM LEFT REGISTRATION MARK 
+    */
     var firstRegMarkX = 48;
     var firstRegMarkY = 34;
 
@@ -91,24 +109,42 @@ var functionality = (function() {
         ctx.setTransform(1,0,0,-1,0,800);
         var row = 0;
         var columns = 0;
+        /**
+         * CALCULATING FULL COLUMNS
+         */
         var fullColumns = Math.floor(qty / qtyy);
+        /**
+         * CALCULATING ITEMS IN LAST ROW
+         */
         var qtyInLastColumn = qty % qtyy;
+        /**
+         * SET VARIABLE WITH FULL COUNT OF COLUMNS
+         */
         if (qtyInLastColumn !== 0){
             columns = fullColumns + 1;
         } else {
             columns = fullColumns;
         }
+        /**
+         * SET VARIABLE WITH NUMBER OF ROWS
+         */
         if (Number(qty) <= Number(qtyy)) {
             row = qty;
         } else {
             row = qtyy;
         }
+        /**
+         * ADDING HEADER TO CUT FILE
+         */
         var cut = 'MGE i-cut script<br>';
         cut += '// Produced by Esko - BRIXSDB 4.0<br>';
         cut += 'Clear<br>';
         cut += 'SystemUnits mm Local<br>';
         cut += 'OpenCuttingKeyFor Canvas A Mixed Eco<br>';
-
+        
+        /**
+         * THIS PART IS RESPOSIBLE FOR PLACING PLACE HOLDERS OF SHEET BARCODE AND BARCODE REGMARKS
+         */
         ctx.beginPath();
         ctx.arc(firstRegMarkX/2,(firstRegMarkY-20)/2,2,0,2*Math.PI);
         ctx.stroke();
@@ -122,108 +158,72 @@ var functionality = (function() {
         ctx.rect((firstRegMarkX)/2-10,(firstRegMarkY)/2-15,2190/2,1524/2);
         ctx.stroke();
         
-        if($('#alg').val() == 1){
-            ctx.beginPath();
-            //WHEN BATCH WILL HAVE MINIMUM SIZE
-            cut += 'RegMark ' + firstRegMarkX + '.0,' + firstRegMarkY + '.0,Regmark<br>';
-            ctx.beginPath();
-            ctx.arc(firstRegMarkX/2,firstRegMarkY/2,2,0,2*Math.PI);
-            ctx.stroke();
-            cut += 'RegMark ' + (cornerPosX + columns*x) + '.0,' + firstRegMarkY + '.0,Regmark<br>';
-            ctx.beginPath();
-            ctx.arc((cornerPosX + columns*x)/2,firstRegMarkY/2,2,0,2*Math.PI);
-            ctx.stroke();
-            cut += 'RegMark ' + firstRegMarkX + '.0,' + (cornerPosY+row*y+12) + '.0,Regmark<br>';
-            ctx.beginPath();
-            ctx.arc(firstRegMarkX/2,(cornerPosY+row*y+12)/2,2,0,2*Math.PI);
-            ctx.stroke();
-            cut += 'RegMark ' + (cornerPosX + columns*x) + '.0,' + (cornerPosY+row*y+12) + '.0,Regmark<br>';
-            ctx.beginPath();
-            ctx.arc((cornerPosX + columns*x)/2,(cornerPosY+row*y+12)/2,2,0,2*Math.PI);
-            ctx.stroke();
-            cut += 'SelectLayer Cut<br>';
-            //IF CUT MINIMUM TIMES
-            for(var i = Number(row); i >=  0; i--){
-                if( i < row - qtyInLastColumn && qtyInLastColumn !== 0 ){
-                    cut += 'MoveTo ' + ((columns * x) + cornerPosX) + '.0,' + ((y * i) + cornerPosY) + '.0,Open,Cut<br>';
-                    cut += 'LineTo ' + (Number(cornerPosX) + Number(x)) + '.0,' + ((y * i) + cornerPosY) +'.0,Corner<br>';
-                    ctx.moveTo(((columns * x) + cornerPosX) /2, ((y * i) + cornerPosY) /2);
-                    ctx.lineTo( (Number(cornerPosX) + Number(x)) /2, ((y * i) + cornerPosY) /2);
-                } else {
-                    cut += 'MoveTo ' + ((columns * x) + cornerPosX) + '.0,' + ((y * i) + cornerPosY) +  '.0,Open,Cut<br>';
-                    cut += 'LineTo ' + cornerPosX + '.0,' + ((y * i) + cornerPosY) + '.0,Corner<br>';
-                    ctx.moveTo(((columns * x) + cornerPosX) /2, ((y * i) + cornerPosY) /2);
-                    ctx.lineTo(cornerPosX /2, ((y * i) + cornerPosY) /2);
-                }
-            }
-            for(var j = Number(columns); j >= 0 ; j--){
-                if (j === 0 && qtyInLastColumn !== 0 ){
-                    cut += 'MoveTo ' + (cornerPosX + (j*x)) + '.0,' + ((row * y) + cornerPosY) + '.0,Open,Cut<br>';
-                    cut += 'LineTo ' + (cornerPosX + (j*x)) + '.0,' + (cornerPosY + ((row - qtyInLastColumn)*y)) +'.0,Corner<br>';
-                    ctx.moveTo((cornerPosX + (j*x)) /2, ((row * y) + cornerPosY) /2);
-                    ctx.lineTo((cornerPosX + (j*x)) /2, (cornerPosY + ((row - qtyInLastColumn)*y)) /2);
-                } else {
-                    cut += 'MoveTo ' + (cornerPosX + (j*x)) + '.0,' + ((row * y) + cornerPosY) + '.0,Open,Cut<br>';
-                    cut += 'LineTo ' + (cornerPosX + (j*x)) + '.0,' + cornerPosY +'.0,Corner<br>';
-                    ctx.moveTo((cornerPosX + (j*x)) /2, ((row * y) + cornerPosY) /2);
-                    ctx.lineTo((cornerPosX + (j*x)) /2, cornerPosY /2);
-                }
-            }
-            ctx.stroke();
-        } else {
-            ctx.beginPath();
-            //WHEN BATCH WILL HAVE MINIMUM SIZE
-            cut += 'RegMark ' + firstRegMarkX + '.0,' + firstRegMarkY + '.0,Regmark<br>';
-            ctx.beginPath();
-            ctx.arc(firstRegMarkX/2,firstRegMarkY/2,2,0,2*Math.PI);
-            ctx.stroke();
-            cut += 'RegMark ' + (cornerPosX + columns*x) + '.0,' + firstRegMarkY + '.0,Regmark<br>';
-            ctx.beginPath();
-            ctx.arc((cornerPosX + columns*x)/2,firstRegMarkY/2,2,0,2*Math.PI);
-            ctx.stroke();
-            cut += 'RegMark ' + firstRegMarkX + '.0,' + (cornerPosY+row*y+12) + '.0,Regmark<br>';
-            ctx.beginPath();
-            ctx.arc(firstRegMarkX/2,(cornerPosY+row*y+12)/2,2,0,2*Math.PI);
-            ctx.stroke();
-            cut += 'RegMark ' + (cornerPosX + columns*x) + '.0,' + (cornerPosY+row*y+12) + '.0,Regmark<br>';
-            ctx.beginPath();
-            ctx.arc((cornerPosX + columns*x)/2,(cornerPosY+row*y+12)/2,2,0,2*Math.PI);
-            ctx.stroke();
-            cut += 'SelectLayer Cut<br>';
-            //IF CUT MINIMUM TIMES
-            for(var i = 0; i <= Number(row) ; i++){
-                if( i > qtyInLastColumn && qtyInLastColumn !== 0 ){
-                    cut += 'MoveTo ' + cornerPosX + '.0,' + (cornerPosY + (y * i)) + '.0,Open,Cut<br>';
-                    cut += 'LineTo ' + (((columns - 1) * x) + cornerPosX) + '.0,' + (cornerPosY + (y * i)) +'.0,Corner<br>';
-                    ctx.moveTo((cornerPosX) /2, (cornerPosY + (y * i)) /2);
-                    ctx.lineTo((((columns - 1) * x) + cornerPosX) /2, (cornerPosY + (y * i)) /2);
-                } else {
-                    cut += 'MoveTo ' + cornerPosX + '.0,' + (cornerPosY + (y * i)) + '.0,Open,Cut<br>';
-                    cut += 'LineTo ' + (((columns) * x) + cornerPosX) + '.0,' + (cornerPosY + (y * i)) +'.0,Corner<br>';
-                    ctx.moveTo((cornerPosX) /2, (cornerPosY + (y * i)) /2);
-                    ctx.lineTo((((columns) * x) + cornerPosX) /2, (cornerPosY + (y * i)) /2);
-                }
-            }
-            for(var j = 0; j <= Number(columns) ; j++){
-                if (j === Number(columns) && qtyInLastColumn !== 0 ){
-                    cut += 'MoveTo ' + (cornerPosX + (x * j)) + '.0,' + cornerPosY + '.0,Open,Cut<br>';
-                    cut += 'LineTo ' + (cornerPosX + (x * j)) + '.0,' + ((qtyInLastColumn * y) + cornerPosY) +'.0,Corner<br>';
-                    ctx.moveTo((cornerPosX + (x * j)) /2, (cornerPosY) /2);
-                    ctx.lineTo((cornerPosX + (x * j)) /2, ((qtyInLastColumn * y) + cornerPosY) /2);
-                } else {
-                    cut += 'MoveTo ' + (cornerPosX + (x * j)) + '.0,' + cornerPosY + '.0,Open,Cut<br>';
-                    cut += 'LineTo ' + (cornerPosX + (x * j)) + '.0,' + ((row * y) + cornerPosY) +'.0,Corner<br>';
-                    ctx.moveTo((cornerPosX + (x * j)) /2, (cornerPosY) /2);
-                    ctx.lineTo((cornerPosX + (x * j)) /2, ((row * y) + cornerPosY) /2);
-                }
-            }
-            ctx.stroke();
-        }
+        ctx.beginPath();
+        /**
+         * WHEN BATCH WILL HAVE MINIMUM SIZE
+         * THIS PART IS RESPONIBLE FOR PLACING REG MARKS ON SHEET
+        */
+        cut += 'RegMark ' + firstRegMarkX + '.0,' + firstRegMarkY + '.0,Regmark<br>';
+        ctx.beginPath();
+        ctx.arc(firstRegMarkX/2,firstRegMarkY/2,2,0,2*Math.PI);
+        ctx.stroke();
+        cut += 'RegMark ' + (cornerPosX + columns*x) + '.0,' + firstRegMarkY + '.0,Regmark<br>';
+        ctx.beginPath();
+        ctx.arc((cornerPosX + columns*x)/2,firstRegMarkY/2,2,0,2*Math.PI);
+        ctx.stroke();
+        cut += 'RegMark ' + firstRegMarkX + '.0,' + (cornerPosY+row*y+12) + '.0,Regmark<br>';
+        ctx.beginPath();
+        ctx.arc(firstRegMarkX/2,(cornerPosY+row*y+12)/2,2,0,2*Math.PI);
+        ctx.stroke();
+        cut += 'RegMark ' + (cornerPosX + columns*x) + '.0,' + (cornerPosY+row*y+12) + '.0,Regmark<br>';
+        ctx.beginPath();
+        ctx.arc((cornerPosX + columns*x)/2,(cornerPosY+row*y+12)/2,2,0,2*Math.PI);
+        ctx.stroke();
+        cut += 'SelectLayer Cut<br>';
+        /**
+         * IF CUT MINIMUM TIMES
+         * THIS PART IS RESPONSIBLE FOR ADDING CUT LINES ON SHEET
+        */
 
+        /**
+         * CALCULATING HORIZONTAL CUTS
+         */
+        for(var i = 0; i <= Number(row) ; i++){
+            if( i > qtyInLastColumn && qtyInLastColumn !== 0 ){
+                cut += 'MoveTo ' + cornerPosX + '.0,' + (cornerPosY + (y * i)) + '.0,Open,Cut<br>';
+                cut += 'LineTo ' + (((columns - 1) * x) + cornerPosX) + '.0,' + (cornerPosY + (y * i)) +'.0,Corner<br>';
+                ctx.moveTo((cornerPosX) /2, (cornerPosY + (y * i)) /2);
+                ctx.lineTo((((columns - 1) * x) + cornerPosX) /2, (cornerPosY + (y * i)) /2);
+            } else {
+                cut += 'MoveTo ' + cornerPosX + '.0,' + (cornerPosY + (y * i)) + '.0,Open,Cut<br>';
+                cut += 'LineTo ' + (((columns) * x) + cornerPosX) + '.0,' + (cornerPosY + (y * i)) +'.0,Corner<br>';
+                ctx.moveTo((cornerPosX) /2, (cornerPosY + (y * i)) /2);
+                ctx.lineTo((((columns) * x) + cornerPosX) /2, (cornerPosY + (y * i)) /2);
+            }
+        }
+        /**
+         * CALCULATING VERTICAL CUTS
+         */
+        for(var j = 0; j <= Number(columns) ; j++){
+            if (j === Number(columns) && qtyInLastColumn !== 0 ){
+                cut += 'MoveTo ' + (cornerPosX + (x * j)) + '.0,' + cornerPosY + '.0,Open,Cut<br>';
+                cut += 'LineTo ' + (cornerPosX + (x * j)) + '.0,' + ((qtyInLastColumn * y) + cornerPosY) +'.0,Corner<br>';
+                ctx.moveTo((cornerPosX + (x * j)) /2, (cornerPosY) /2);
+                ctx.lineTo((cornerPosX + (x * j)) /2, ((qtyInLastColumn * y) + cornerPosY) /2);
+            } else {
+                cut += 'MoveTo ' + (cornerPosX + (x * j)) + '.0,' + cornerPosY + '.0,Open,Cut<br>';
+                cut += 'LineTo ' + (cornerPosX + (x * j)) + '.0,' + ((row * y) + cornerPosY) +'.0,Corner<br>';
+                ctx.moveTo((cornerPosX + (x * j)) /2, (cornerPosY) /2);
+                ctx.lineTo((cornerPosX + (x * j)) /2, ((row * y) + cornerPosY) /2);
+            }
+        }
+        ctx.stroke();
+         /**
+         * THIS OFFSET IS NECESSARY
+         */
         cut += 'Offset 1.0, 20.0<br>';
         return cut;
     }
-
    
     /**
      * Functions what must be executed when document is fully loaded
