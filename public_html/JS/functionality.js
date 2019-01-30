@@ -10,6 +10,7 @@ var functionality = (function() {
         $('#chooseSize').html(generateTypeSelectBody(getSizes()));        
         getSelectedTypeData();
         $('#chooseQty').html(buildQtySelectOptions(qtyx, qtyy));
+        $('#size').html('Size of single item is: '+x+'mm x '+y+'mm');
         $('.cutFileBody').html(createCutFile(x, y, qtyx, qtyy, $('#chooseQty').val()));
         listeners();
     });
@@ -21,9 +22,11 @@ var functionality = (function() {
         $('#chooseSize').on('change', function() {
             getSelectedTypeData();
             $('#chooseQty').html(buildQtySelectOptions(qtyx, qtyy));
+            $('#size').html('Size of single item is: '+x+'mm x '+y+'mm');
             $('.cutFileBody').html(createCutFile(x, y, qtyx, qtyy, $('#chooseQty').val()));
         });
         $('#chooseQty').on('change', function() {
+            $('#size').html('Size of single item is: '+x+'mm x '+y+'mm');
             $('.cutFileBody').html(createCutFile(x, y, qtyx, qtyy, $('#chooseQty').val()));
         });
     });
