@@ -7,7 +7,8 @@ var functionality = (function() {
      * Things what must be done when page is loaded
      */
     var init = (function() {
-        $('#chooseSize').html(generateTypeSelectBody(getSizes()));        
+        $('#chooseType').html(generateTypeSelectBody(getTypes()));
+        $('#chooseSize').html(generateSizeSelectBody(getSizes()));        
         getSelectedTypeData();
         $('#chooseQty').html(buildQtySelectOptions(qtyx, qtyy));
         $('#size').html('Size of single item is: '+x+'mm x '+y+'mm');
@@ -25,10 +26,34 @@ var functionality = (function() {
             $('#size').html('Size of single item is: '+x+'mm x '+y+'mm');
             $('.cutFileBody').html(createCutFile(x, y, qtyx, qtyy, $('#chooseQty').val()));
         });
+        $('#chooseType').on('change', function() {
+            $('#chooseSize').html(generateSizeSelectBody(getSizes()));
+            getSelectedTypeData();
+            $('#chooseQty').html(buildQtySelectOptions(qtyx, qtyy));
+            $('#size').html('Size of single item is: '+x+'mm x '+y+'mm');
+            $('.cutFileBody').html(createCutFile(x, y, qtyx, qtyy, $('#chooseQty').val()));
+        });
         $('#chooseQty').on('change', function() {
             $('#size').html('Size of single item is: '+x+'mm x '+y+'mm');
             $('.cutFileBody').html(createCutFile(x, y, qtyx, qtyy, $('#chooseQty').val()));
         });
+    });
+    /**
+     * GET INFORMATIONS FROM DB ABOUT AVAILABLE SIZES
+     */
+    var getTypes = (function(){
+        var res;
+        $.ajax({
+            type: 'POST',
+            async: false,
+            dataType: 'json',
+            url: 'PHP/getTypes.php',            
+            success: function(data){
+                res = data;
+                console.log(res);
+            }
+        });
+        return res;
     });
 
     /**
@@ -36,6 +61,18 @@ var functionality = (function() {
      * @param {ARRAY} data 
      */
     var generateTypeSelectBody = function(data){
+        var ans = '';
+        $.each(data,function(index, value){
+            ans += "<option value='"+value['type_type']+"'>"+value['type_type']+"</option>";
+        });    
+        return ans;
+    }
+
+    /**
+     * GENERATING TYPE SELECT CONTENT
+     * @param {ARRAY} data 
+     */
+    var generateSizeSelectBody = function(data){
         var ans = '';
         $.each(data,function(index, value){
             ans += "<option value='"+value['type_id']+"'>"+value['type_name']+"</option>";
@@ -47,9 +84,12 @@ var functionality = (function() {
      */
     var getSizes = (function(){
         var res;
+        var param = {};
+        param['typeType'] = $('#chooseType').val();
         $.ajax({
             type: 'POST',
             async: false,
+            data: param,
             dataType: 'json',
             url: 'PHP/getSizes.php',            
             success: function(data){
@@ -80,6 +120,8 @@ var functionality = (function() {
     var getSelectedTypeData = (function(){
         var param = {};
         param['typeId'] = $('#chooseSize').val();
+        param['typeType'] = $('#chooseType').val();
+        console.log(param['typeType']);
         $.ajax({
             type: 'POST',
             async: false,

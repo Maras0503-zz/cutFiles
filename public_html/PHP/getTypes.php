@@ -1,15 +1,13 @@
 <?php
-    $typeType = $_POST['typeType'];
     //SELECT INFORMATION ABOUT PRODUCTS
-    $query = "select * from type_tab where type_type='".$typeType."' order by type_type, type_name";        
+    $query = "select distinct type_type from type_tab";        
     
     function select($query){
         include('connection.php');
         $returnArray = array();
         $fetch = $mysqli->query($query); 
             while ($row = $fetch->fetch_array()) {
-                $rowArray['type_id'] = $row['type_id'];
-                $rowArray['type_name'] = $row['type_name'];
+                $rowArray['type_type'] = $row['type_type'];
                 array_push($returnArray,$rowArray);
             }
             $mysqli->close();
